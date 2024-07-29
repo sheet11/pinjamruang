@@ -81,19 +81,38 @@
   <div class="col-md-12 text-center daftar">
 				<?php 
 					include "koneksi.php";
-					$query = "SELECT * FROM ruangan";
+					$query = "SELECT * FROM ruangan WHERE status='Tersedia'";
                     $result = mysqli_query($koneksi,$query) or die (mysqli_error($koneksi));
                     
 					while($row = mysqli_fetch_array($result)){
                 ?>
         
 				<div class="col-md-4 detail">
-					<img src="assets/img/undipthumb.png" alt="" height="256" width="256">
+					<img src="assets/img/logo2.png" alt="" height="256" width="256">
 					<h5><b><?php echo $row['nama_ruang']; ?></b></h5>
                     <p><?php echo 'Gedung '.$row['gedung']; ?></p>
-                    <p><?php echo $row['status']; ?></p>
+                    <p><span class='badge hijau'><?php echo $row['status']; ?></span></p>
                     <td><?php echo "<a href='#myModal' class='btn btn-pjm' id='tombol' data-toggle='modal' data-id=".$row['id_ruang'].">DETAIL</a>"; ?></td> 
                     <td><a href="user_peminjaman_ruangan.php?id=<?php echo $row['id_ruang']; ?>" class='btn btn-pjm' id='tombol'>PINJAM</a></td>       
+				</div>
+				<?php 
+					}
+				?>
+        <?php 
+					include "koneksi.php";
+					$query = "SELECT * FROM ruangan WHERE status='Tidak Tersedia'";
+                    $result = mysqli_query($koneksi,$query) or die (mysqli_error($koneksi));
+                    
+					while($row = mysqli_fetch_array($result)){
+                ?>
+        
+				<div class="col-md-4 detail">
+					<img src="assets/img/logo2.png" alt="" height="256" width="256" disabled>
+					<h5><b><?php echo $row['nama_ruang']; ?></b></h5>
+                    <p><?php echo 'Gedung '.$row['gedung']; ?></p>
+                    <p><span class='badge merah'><?php echo $row['status']; ?></span></p>
+                    <td><?php echo "<a href='#myModal' class='btn btn-pjm' id='tombol' data-toggle='modal' data-id=".$row['id_ruang'].">DETAIL</a>"; ?></td> 
+                    <td><a class='btn btn-pjm' id='tombol' disabled>PINJAM</a></td>       
 				</div>
 				<?php 
 					}
@@ -102,7 +121,21 @@
 		</div>
 </div>
     
+<style type="text/css">
+.merah{
+  background-color: red;
+}
+.biru{
+  background-color: blue;
+}
+.kuning{
+  background-color: orange;
+}
+.hijau{
+  background-color: green;
+}
 
+</style>
 
 <div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog" role="document">

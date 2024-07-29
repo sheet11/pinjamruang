@@ -129,9 +129,11 @@
   <a href="./user_detail_labkom.php" class="btn btn-lg"><span class="glyphicon glyphicon-blackboard"></span><br>Lab Komputer</a>
 
   <a href="./user_detail_teater.php" class="btn btn-lg"><span class="glyphicon glyphicon-blackboard"></span><br>Ruang Teater</a>
-
+  <br>
   <a href="./user_detail_upbahasa.php" class="btn btn-lg"><span class="glyphicon glyphicon-blackboard"></span><br>Unit Pengembangan Bahasa</a>
 
+  <a href="./user_detail_labcurup.php" class="btn btn-lg"><span class="glyphicon glyphicon-blackboard"></span><br>Lab Komputer Curup</a>
+  
 </div> 
 </body>
 </html>
