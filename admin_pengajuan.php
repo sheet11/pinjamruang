@@ -95,14 +95,12 @@
                 <th>Nama Peminjam</th>
                 <th>Instansi</th>
                 <th>Nama Ruang</th>
-                <th>Kegiatan</th>
+                <th style="width: 20px">Kegiatan</th>
                 <th>Jam Pengajuan</th>
                 <th>Waktu Pelaksanaan</th>
-                <th style="left: 200px;">Waktu Selesai</th>
+                <th>Waktu Selesai</th>
                 <th>Status</th>
-                <th>Surat Permohonan</th>
-                <th>Surat Persetujuan</th>
-                <th colspan="4">Aksi</th>
+                <th>Aksi</th>
               </tr>
             </thead>
 
@@ -123,46 +121,37 @@
         <td><?php echo $d['start_date'] ?></td>
 				<td><?php echo $d['end_date']; ?></td>
         <td><?php echo $d['status']; ?></td>
-        <td><?php echo "<a href='surat_permohonan.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-success btn-small'>Cetak</a>"; ?></td>
-        <td><?php
-        if($d['status']=='Disetujui' || $d['status']=='Selesai') 
-          {
-            echo "<a href='surat_persetujuan.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-success btn-small'>Cetak</a>"; 
-          }
-        ?></td>
         <?php 
         if($d['status']=='Diajukan')
         {
           ?>
-          <td><?php echo "<a href='admin_pengajuan.php?proses&kode_pinjam=".$d['kode_pinjam']."&status=1' class='btn btn-success btn-small'>Setujui</a>"; ?></td>
-          <td><?php echo "<a href='admin_pengajuan.php?proses&kode_pinjam=".$d['kode_pinjam']."&status=3' class='btn btn-danger btn-small'>Batalkan</a>"; ?></td>
-          <td><?php echo "<a href='admin_edit_pengajuan.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Edit</a>"; ?></td>
-          <td><?php echo "<a href='delete.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Hapus</a>"; ?></td>
+          <td><?php echo "<a href='admin_pengajuan.php?proses&kode_pinjam=".$d['kode_pinjam']."&status=1' class='btn btn-success btn-small'>Setujui</a>"; ?>
+          <?php echo "<a href='admin_pengajuan.php?proses&kode_pinjam=".$d['kode_pinjam']."&status=3' class='btn btn-danger btn-small'>Batalkan</a>"; ?>
+          <?php echo "<a href='admin_edit_pengajuan.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Edit</a>"; ?>
+          <?php echo "<a href='delete.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Hapus</a>"; ?></td>
           <?php
         }
         elseif($d['status']=='Disetujui')
         {
           ?>
-          <td><?php echo "<a href='admin_pengajuan.php?proses&kode_pinjam=".$d['kode_pinjam']."&status=2' class='btn btn-primary btn-small'>Selesaikan<br></a>"; ?></td>
-          <td><?php echo "<a href='admin_pengajuan.php?proses&kode_pinjam=".$d['kode_pinjam']."&status=3' class='btn btn-danger btn-small'>Batalkan</a>"; ?></td>
-          <td><?php echo "<a href='admin_edit_pengajuan.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Edit</a>"; ?></td>
-          <td><?php echo "<a href='delete.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Hapus</a>"; ?></td>
+          <td><?php echo "<a href='admin_pengajuan.php?proses&kode_pinjam=".$d['kode_pinjam']."&status=2' class='btn btn-primary btn-small'>Selesaikan<br></a>"; ?>
+          <?php echo "<a href='admin_pengajuan.php?proses&kode_pinjam=".$d['kode_pinjam']."&status=3' class='btn btn-danger btn-small'>Batalkan</a>"; ?>
+          <?php echo "<a href='admin_edit_pengajuan.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Edit</a>"; ?>
+          <?php echo "<a href='delete.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Hapus</a>"; ?></td>
           <?php
         }
         elseif($d['status']=='Selesai')
         {
           ?>
-          <td><?php echo "<a href='delete.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Hapus</a>"; ?></td>
-          <td><?php echo "<a href='admin_edit_pengajuan.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Edit</a>"; ?></td>
-          <td colspan="2"></td>
+          <td><?php echo "<a href='delete.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Hapus</a>"; ?>
+          <?php echo "<a href='admin_edit_pengajuan.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Edit</a>"; ?></td>
           <?php
         }
         else{
           ?>
-          <td><?php echo "<a href='admin_edit_keterangan.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Alasan Batal</a>"; ?></td>
-          <td><?php echo "<a href='admin_edit_pengajuan.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Edit</a>"; ?></td>
-          <td><?php echo "<a href='delete.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Hapus</a>"; ?></td>
-          <td colspan="2"></td>
+          <td><?php echo "<a href='admin_edit_keterangan.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Alasan Batal</a>"; ?>
+          <?php echo "<a href='admin_edit_pengajuan.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Edit</a>"; ?>
+          <?php echo "<a href='delete.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-danger btn-small'>Hapus</a>"; ?></td>
           <?php
         }
 
@@ -175,7 +164,10 @@
     </table>
     <script type="text/javascript">
       $(document).ready(function () {
-    $('#pengajuan').DataTable();
+    $('#pengajuan').DataTable({
+      stateSave: true,
+      ordering: false
+    });
 });
     </script>
     </div>
