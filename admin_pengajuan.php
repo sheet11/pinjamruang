@@ -100,6 +100,8 @@
                 <th>Waktu Pelaksanaan</th>
                 <th>Waktu Selesai</th>
                 <th>Status</th>
+                <th>Surat Permohonan</th>
+                <th>Surat Persetujuan</th>
                 <th>Aksi</th>
               </tr>
             </thead>
@@ -121,6 +123,13 @@
         <td><?php echo $d['start_date'] ?></td>
 				<td><?php echo $d['end_date']; ?></td>
         <td><?php echo $d['status']; ?></td>
+        <td><?php echo "<a href='surat_permohonan.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-success btn-small'>Cetak</a>"; ?></td>
+        <td><?php
+        if($d['status']=='Disetujui' || $d['status']=='Selesai') 
+          {
+            echo "<a href='surat_persetujuan.php?kode_pinjam=".$d['kode_pinjam']."' class='btn btn-success btn-small'>Cetak</a>"; 
+          }
+        ?></td>
         <?php 
         if($d['status']=='Diajukan')
         {
@@ -190,6 +199,7 @@
   margin-top: 5px;
   padding-right: 24.5px;
 }
+
 </style>
 
 <!-- <i class='fa fa-print fa-sm'></i> -->
