@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <link href="./style.css" type="text/css" rel="stylesheet">
+  <link href="./template.css" type="text/css" rel="stylesheet">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script>
@@ -80,19 +81,17 @@
     });
 }(jQuery, window));
   </script>
-  <style>
-
-  </style>
 </head>
 
 
 
 
 
-<body>
+<body class="home-page">
 <nav class="navbar">
   <div class="container-fluid">
     <div class="navbar-header">
+      <a class="navbar-brand" href="index.php"><span class="glyphicon glyphicon-home"></span> &nbsp;Peminjaman Ruangan</a>
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -101,39 +100,40 @@
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="index.php">Menu Utama</a></li>
+        <li class="active"><a href="index.php">Beranda</a></li>
+        <li><a href="user_jadwal.php">Kalender</a></li>
+        <li><a href="user_peminjaman.php">Ajukan Peminjaman</a></li>
         <li><a href="about.php">About</a></li>
-        <li><a href="kontak.php">Contact</a></li>
+        <li><a href="kontak.php">Kontak</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><a id="login" href="login.php"><span class="glyphicon glyphicon-log-in"></span> Login Admin</a></li>
+        <li><a id="login" href="login.php"><span class="glyphicon glyphicon-log-in"></span> Admin</a></li>
       </ul>
     </div>
   </div>
 </nav>
 
-<div class="container-fluid text-center">
-	<br><br><br><br>
-	<h2>Halaman Utama Peminjaman Ruangan</h2><br>
-	<h3>Poltekkes Kemenkes Bengkulu</h3>
-    <h3>Poltekkes Kemenkes Bengkulu</h3><br><br>
-
-  <a href="./user_jadwal.php" class="btn btn-lg"><span class="glyphicon glyphicon-calendar"></span><br>Kalender</a>
-  <!-- <a href="./user_detail.php" class="btn btn-lg"><span class="glyphicon glyphicon-tower"></span><br>Lihat Peminjaman</a> -->
-  <a href="./user_peminjaman.php" class="btn btn-lg"><span class="glyphicon glyphicon-earphone"></span><br>Peminjaman</a>
-
-</div> 
-<div class="container-fluid text-center">
-  <a href="./user_detail_osca.php" class="btn btn-lg"><span class="glyphicon glyphicon-blackboard"></span><br>Lab Osca</a>
-
-  <a href="./user_detail_labkom.php" class="btn btn-lg"><span class="glyphicon glyphicon-blackboard"></span><br>Lab Komputer</a>
-
-  <a href="./user_detail_teater.php" class="btn btn-lg"><span class="glyphicon glyphicon-blackboard"></span><br>Ruang Teater</a>
-  <br>
-  <a href="./user_detail_upbahasa.php" class="btn btn-lg"><span class="glyphicon glyphicon-blackboard"></span><br>Unit Pengembangan Bahasa</a>
-
-  <a href="./user_detail_labcurup.php" class="btn btn-lg"><span class="glyphicon glyphicon-blackboard"></span><br>Lab Komputer Curup</a>
-  
-</div> 
+<main class="home-wrap">
+  <section class="home-hero" aria-labelledby="page-title">
+    <div class="eyebrow">Poltekkes Kemenkes Bengkulu</div>
+    <h1 id="page-title">Temukan ruang, mulai kegiatan.</h1>
+    <p>Jelajahi jadwal ruangan dan ajukan peminjaman dengan mudah melalui satu tempat.</p>
+    <div class="home-actions">
+      <a class="primary-action" href="user_peminjaman.php"><span class="glyphicon glyphicon-edit"></span> Ajukan Peminjaman</a>
+      <a class="secondary-action" href="user_jadwal.php"><span class="glyphicon glyphicon-calendar"></span> Lihat Kalender</a>
+    </div>
+  </section>
+  <section aria-labelledby="room-title">
+    <div class="section-heading"><div><h2 id="room-title">Jelajahi Ruangan</h2><p>Pilih ruang untuk melihat informasi dan detailnya.</p></div></div>
+    <div class="room-grid">
+      <a class="room-card" href="user_detail_osca.php"><span class="room-icon glyphicon glyphicon-blackboard"></span><span><strong>Lab OSCA</strong><small>Laboratorium keterampilan</small></span></a>
+      <a class="room-card" href="user_detail_labkom.php"><span class="room-icon glyphicon glyphicon-blackboard"></span><span><strong>Lab Komputer</strong><small>Laboratorium komputer</small></span></a>
+      <a class="room-card" href="user_detail_teater.php"><span class="room-icon glyphicon glyphicon-blackboard"></span><span><strong>Ruang Teater</strong><small>Ruang kegiatan dan acara</small></span></a>
+      <a class="room-card" href="user_detail_upbahasa.php"><span class="room-icon glyphicon glyphicon-blackboard"></span><span><strong>Unit Pengembangan Bahasa</strong><small>Ruang Unit Pengembangan Bahasa</small></span></a>
+      <a class="room-card" href="user_detail_labcurup.php"><span class="room-icon glyphicon glyphicon-blackboard"></span><span><strong>Lab Komputer Curup</strong><small>Laboratorium komputer Curup</small></span></a>
+    </div>
+  </section>
+  <footer class="home-footer">Poltekkes Kemenkes Bengkulu &middot; Layanan Peminjaman Ruangan</footer>
+</main>
 </body>
 </html>

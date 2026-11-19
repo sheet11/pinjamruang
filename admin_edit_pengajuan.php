@@ -1,259 +1,217 @@
-
-<!-- <?php 
-		include 'koneksi.php';
-
-	$data=mysqli_query($koneksi,"select * from meminjam where kode_pinjam='$_GET[kode_pinjam]'");
-	$a=mysqli_fetch_array($data);	
-?>
- -->
 <?php
-// Display selected user data based on id
-// Getting id from url
-$kode = $_GET['kode_pinjam'];
- 
-// Fetech user data based on id
-$data = mysqli_query($koneksi, "SELECT * FROM meminjam WHERE kode_pinjam=$kode");
- 
-while($a = mysqli_fetch_array($data))
-{
-    $nama = $a['nama_peminjam'];
-    $instansi = $a['instansi_peminjam'];
-    $ruang = $a['nama_ruang'];
-    $kegiatan = $a['nama_kegiatan'];
-    $mulai = $a['start_date'];
-    $selesai = $a['end_date'];
-    $status = $a['status'];
-    $jumlah = $a['jumlah_mahasiswa'];
+session_start();
+date_default_timezone_set('Asia/Jakarta');
+include 'koneksi.php';
+
+if (empty($_SESSION['username']) || empty($_SESSION['password'])) {
+    header('Location: cek_login.php');
+    exit;
+}
+
+$kode = isset($_GET['kode_pinjam']) ? (int) $_GET['kode_pinjam'] : 0;
+$stmt = mysqli_prepare($koneksi, 'SELECT * FROM meminjam WHERE kode_pinjam = ?');
+mysqli_stmt_bind_param($stmt, 'i', $kode);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$booking = mysqli_fetch_assoc($result);
+mysqli_stmt_close($stmt);
+
+function adminEditText($value) {
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
+
+function adminEditDatePart($value, $format) {
+    $timestamp = strtotime((string) $value);
+    return $timestamp ? date($format, $timestamp) : '';
 }
 ?>
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <title>Pengajuan | Poltekkes Kemenkes Bengkulu</title>
+  <title>Edit Pengajuan #<?php echo $kode; ?> | Admin</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-  <link rel="stylesheet" href="css/bootstrap-datetimepicker.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <link href="./style.css" type="text/css" rel="stylesheet">
- 
-  <script type="text/javascript">
-            $(function () {
-                $('#datetimepicker1').datetimepicker({locale: 'id'});
-                $('#datetimepicker2').datetimepicker({
-                    locale: 'id',
-                    useCurrent: false //Important! See issue #1075
-                });
-                $("#datetimepicker1").on("dp.change", function (e) {
-                    $('#datetimepicker2').data("DateTimePicker").minDate(e.date);
-                });
-                $("#datetimepicker2").on("dp.change", function (e) {
-                    $('#datetimepicker1').data("DateTimePicker").maxDate(e.date);
-                });
-            });
-  </script>
-
-<style>
-    
-</style>
+  <link href="./template.css" type="text/css" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 
-<body>
+<body class="booking-page">
 <nav class="navbar">
   <div class="container-fluid">
     <div class="navbar-header">
+      <a class="navbar-brand" href="admin_menu.php"><span class="glyphicon glyphicon-home"></span> &nbsp;Admin Peminjaman</a>
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
-        <span class="icon-bar"></span>                        
+        <span class="icon-bar"></span>
       </button>
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="index.php">Menu Utama</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="kontak.html">Contact</a></li>
+        <li><a href="admin_menu.php">Menu Admin</a></li>
+        <li class="active"><a href="admin_pengajuan.php">Pengajuan</a></li>
+        <li><a href="admin_jadwal.php">Jadwal</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="logout.php"><span class="glyphicon glyphicon-log-out"></span> Keluar</a></li>
       </ul>
     </div>
   </div>
 </nav>
 
-<div class="container-fluid">
-  <div class="row content">
-    <div class="col-sm-2 text-center backtop">
-        <br><br><br><br>
-        <a href="./admin_pengajuan.php"><button class="btn backbutton1"><span class="glyphicon glyphicon-menu-left"></span> Kembali</button></a>
-    </div>
-    <div class="col-sm-8 text-center">
-        <br><br><br><br>
-        <h2>Form Edit Pengajuan Peminjaman Ruangan</h2><br>
-        <h3>Poltekkes Kemenkes Bengkulu</h3><br><br>
-    </div>
-    <div class="col-sm-2">
-    </div>
-  </div>
-</div>
+<main class="booking-shell">
+  <a class="booking-back" href="admin_pengajuan.php"><span class="glyphicon glyphicon-menu-left"></span> Kembali ke pengajuan</a>
 
-<div class="col-md-12 daftar">
-  <div class="col-sm-3"></div>
-	<div class="col-md-6 form">
-		<form method="post" action="admin_prosespinjam.php">
-			<input type="hidden" name="kode_pinjam" value="<?php echo $_GET['kode_pinjam']; ?>">
+  <?php if (!$booking): ?>
+    <div class="booking-error" role="alert">Data pengajuan tidak ditemukan.</div>
+  <?php else: ?>
+  <header class="booking-heading">
+    <h1>Edit Pengajuan Peminjaman</h1>
+    <p>Periksa data pemohon, jadwal, dan status sebelum menyimpan perubahan.</p>
+  </header>
 
-            <div class="form-group">
-		    	<label>Nama Peminjam</label>
-                <input type="text" class="form-control" placeholder="Masukkan Nama Peminjam" value="<?php echo $nama; ?>" name="nama" required autocomplete="off" >
-            </div>
+  <div class="booking-grid">
+    <section class="booking-card" aria-label="Form edit pengajuan">
+      <form method="post" action="admin_prosespinjam.php" id="adminBookingForm">
+        <input type="hidden" name="kode_pinjam" value="<?php echo (int) $booking['kode_pinjam']; ?>">
 
-
-            <div class="form-group">
-          <label>Nama Instansi</label>
-          <input type="text" class="form-control" placeholder="Masukkan Nama Instansi" value="<?php echo $instansi; ?>" name="instansi" required autocomplete="off">
+        <div class="form-group">
+          <label for="nama">Nama Peminjam</label>
+          <input type="text" class="form-control" id="nama" name="nama" value="<?php echo adminEditText($booking['nama_peminjam']); ?>" required maxlength="255">
         </div>
 
-			<div class="form-group">
-		    	<label>Nama Ruangan</label>
-                <input type="text" class="form-control" readonly name="ruang"  value="<?php echo $ruang; ?>">
-			</div>
+        <div class="form-group">
+          <label for="instansi">Nama Instansi / Unit</label>
+          <input type="text" class="form-control" id="instansi" name="instansi" value="<?php echo adminEditText($booking['instansi_peminjam']); ?>" required maxlength="50">
+        </div>
 
-            <div class="form-group">
-		    	<label>Nama Kegiatan</label>
-		    	<input type="text" class="form-control" placeholder="Masukkan Nama Kegiatan" value="<?php echo $kegiatan; ?>" name="kegiatan" required autocomplete="off">
-		  	</div>
+        <div class="form-group">
+          <label for="ruang">Ruangan</label>
+          <input type="text" class="form-control" id="ruang" name="ruang" value="<?php echo adminEditText($booking['nama_ruang']); ?>" readonly>
+        </div>
 
+        <div class="form-group">
+          <label for="kegiatan">Nama Kegiatan</label>
+          <input type="text" class="form-control" id="kegiatan" name="kegiatan" value="<?php echo adminEditText($booking['nama_kegiatan']); ?>" required maxlength="255">
+        </div>
 
-            <div class="form-group">
-		    	<label>Waktu Mulai Meminjam</label>
-		    	<div class='input-group date' id='datetimepicker1'>
-                    <input type='text' placeholder="Tentukan Tanggal dan Jam Mulai Kegiatan" value="<?php echo $mulai; ?>" name="mulai" class="form-control" autocomplete="off" onkeydown="event.preventDefault()"/>
-                    <span class="input-group-addon calicon">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
-                </div>
-            </div>
+        <div class="form-group">
+          <label>Waktu Mulai</label>
+          <div class="booking-time-grid">
+            <input type="date" id="start_date_input" class="form-control" aria-label="Tanggal mulai" value="<?php echo adminEditDatePart($booking['start_date'], 'Y-m-d'); ?>" required>
+            <input type="time" id="start_time_input" class="form-control" aria-label="Jam mulai" value="<?php echo adminEditDatePart($booking['start_date'], 'H:i'); ?>" step="1800" required>
+          </div>
+          <input type="hidden" name="mulai" id="mulai">
+        </div>
 
+        <div class="form-group">
+          <label>Waktu Selesai</label>
+          <div class="booking-time-grid">
+            <input type="date" id="end_date_input" class="form-control" aria-label="Tanggal selesai" value="<?php echo adminEditDatePart($booking['end_date'], 'Y-m-d'); ?>" required>
+            <input type="time" id="end_time_input" class="form-control" aria-label="Jam selesai" value="<?php echo adminEditDatePart($booking['end_date'], 'H:i'); ?>" step="1800" required>
+          </div>
+          <input type="hidden" name="selesai" id="selesai">
+        </div>
 
-            <div class="form-group">
-		    	<label>Waktu Selesai Meminjam</label>
-		    	<div class='input-group date' id='datetimepicker2'>
-                    <input type='text' placeholder="Tentukan Tanggal dan Jam Selesai Kegiatan" value="<?php echo $selesai; ?>" name="selesai" class="form-control" autocomplete="off" onkeydown="event.preventDefault()"/>
-                    <span class="input-group-addon calicon">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
-                </div>    
-		  	</div>
+        <div class="booking-duration" id="adminBookingDuration" aria-live="polite">
+          <span class="glyphicon glyphicon-time"></span>
+          <span>Durasi akan dihitung dari waktu mulai dan selesai.</span>
+        </div>
 
-            <div class="form-group">
-                <label>Jumlah Mahasiswa</label>
-                <input type="text" class="form-control" placeholder="Masukkan Nama Instansi" value="<?php echo $jumlah; ?>" name="jumlah" required autocomplete="off">
-            </div>
+        <div class="form-group">
+          <label for="jumlah">Jumlah Peserta</label>
+          <input type="number" class="form-control" id="jumlah" name="jumlah" value="<?php echo (int) $booking['jumlah_mahasiswa']; ?>" required min="1" max="9999">
+        </div>
 
-          
-            <div class="form-group">
-                <label>Status Peminjaman</label>
-                <div class='input-group'>
-                    <select class="form-control" name="status">
-                        <option>---Pilih---</option>
-                        <option <?php if ($status == 'Disetujui') { echo 'selected'; }?> value="Disetujui">Disetujui</option>
-                        <option <?php if ($status == 'Diajukan') { echo 'selected'; }?> value="Diajukan">Diajukan</option>
-                        <option <?php if ($status == 'Batal') { echo 'selected'; }?> value="Batal">Batal</option>
-                        <option <?php if ($status == 'Selesai') { echo 'selected'; }?> value="Selesai">Selesai</option>
-                    </select>
-                </div>    
-            </div>
+        <div class="booking-actions">
+          <a class="btn btn-default" href="admin_pengajuan.php">Batal</a>
+          <button type="submit" class="btn btn-primary" name="update" value="1">
+            <span class="glyphicon glyphicon-floppy-disk"></span> Simpan Perubahan
+          </button>
+        </div>
+      </form>
+    </section>
 
-            <br>
-            
-              <input type="submit" value="Update" name="update" class="btn btnacc">
-            
-            <br><br>
-		</form>
-	</div>
-  <div class="col-sm-3"></div>
-</div>
+    <aside class="room-summary admin-booking-summary" aria-label="Kontrol admin">
+      <div class="room-summary-icon"><span class="glyphicon glyphicon-edit"></span></div>
+      <h2>Kontrol Admin</h2>
+      <p>Perbarui status pengajuan sesuai hasil pemeriksaan.</p>
+      <div class="admin-booking-meta">
+        <span>Nomor pengajuan</span>
+        <strong>#<?php echo (int) $booking['kode_pinjam']; ?></strong>
+      </div>
+      <div class="admin-booking-meta">
+        <span>Ruangan</span>
+        <strong><?php echo adminEditText($booking['nama_ruang']); ?></strong>
+      </div>
+      <div class="form-group admin-status-field">
+        <label for="status">Status Pengajuan</label>
+        <select class="form-control" id="status" name="status" form="adminBookingForm" required>
+          <?php foreach (array('Diajukan', 'Disetujui', 'Selesai', 'Batal') as $option): ?>
+            <option value="<?php echo $option; ?>" <?php echo $booking['status'] === $option ? 'selected' : ''; ?>><?php echo $option; ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="admin-booking-note">
+        <span class="glyphicon glyphicon-info-sign"></span>
+        Perubahan status akan terlihat pada kalender dan daftar pengajuan.
+      </div>
+    </aside>
+  </div>
+  <?php endif; ?>
+</main>
 
-<br>
-<br>
+<script>
+  $(function () {
+    function updateDuration() {
+      var startValue = $('#start_date_input').val() + 'T' + $('#start_time_input').val();
+      var endValue = $('#end_date_input').val() + 'T' + $('#end_time_input').val();
+      var start = new Date(startValue);
+      var end = new Date(endValue);
+      var duration = $('#adminBookingDuration');
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-        <script type="text/javascript" src="js/moment.js"></script>
-        <script type="text/javascript" src="js/bootstrap-datetimepicker.js"></script>
-        <script type="text/javascript">
-            $(function () {
-                $('.date').datetimepicker({
-                    format: 'YYYY-MM-DD HH:mm'
-                });
-            });
-        </script>
+      $('#mulai').val(startValue.replace('T', ' '));
+      $('#selesai').val(endValue.replace('T', ' '));
 
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        duration.html('<span class="glyphicon glyphicon-time"></span><span>Pilih tanggal dan jam untuk menghitung durasi.</span>');
+        return;
+      }
+
+      var milliseconds = end.getTime() - start.getTime();
+      if (milliseconds <= 0) {
+        duration.html('<span class="glyphicon glyphicon-warning-sign"></span><span><strong>Waktu selesai harus setelah waktu mulai.</strong></span>');
+        return;
+      }
+
+      var totalMinutes = Math.floor(milliseconds / 60000);
+      var hours = Math.floor(totalMinutes / 60);
+      var minutes = totalMinutes % 60;
+      var text = hours ? hours + ' jam' : '';
+      if (minutes) text += (text ? ' ' : '') + minutes + ' menit';
+      duration.html('<span class="glyphicon glyphicon-time"></span><span>Durasi peminjaman: <strong>' + text + '</strong></span>');
+    }
+
+    function syncDateTimeFields() {
+      updateDuration();
+    }
+
+    $('#start_date_input, #start_time_input, #end_date_input, #end_time_input').on('change', syncDateTimeFields);
+    $('#adminBookingForm').on('submit', function (event) {
+      syncDateTimeFields();
+      var start = new Date($('#mulai').val().replace(' ', 'T'));
+      var end = new Date($('#selesai').val().replace(' ', 'T'));
+      if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
+        event.preventDefault();
+        alert('Waktu selesai harus setelah waktu mulai.');
+      }
+    });
+
+    syncDateTimeFields();
+  });
+</script>
 </body>
 </html>
-
-
-<!-- <aside class="right-side">
-    <section class="content-header">
-    	<div class="container-fluid" style="margin:10px;">
-			<form method="post" name="edit_pengajuan" action="admin_prosespinjam.php" enctype="multipart/form-data">	
-				<table width="100%" border="0" class="table table-hover">
-					<input type="hidden" name="kode_pinjam" value="<?php echo $_GET['kode_pinjam']; ?>">
-					
-					<tr>
-						<td class="info" colspan="3"><b>Edit Peminjaman</b></td> 
-					</tr>
-
-					<tr>
-						<td>Nama Mahasiswa</td>
-					</tr>
-					<tr> 
-						<td><input type="text" placeholder="Nama Peminjam" name="nama" required="yes" class="form-control" value="<?php echo $nama; ?>"></td>
-					</tr>
-					
-					<tr>
-						<td>instansi_peminjam</td>
-					</tr>
-					<tr> 
-						<td><input type="text" placeholder="instansi peminjam" name="instansi" class="form-control" value="<?php echo $instansi; ?>"></td> 
-					</tr>
-
-
-					<tr>
-						<td>nama_ruang</td>
-					</tr>
-					<tr>
-						<td><input type="text" placeholder="nama ruang" name="ruang" class="form-control" value="<?php echo $ruang; ?>"></td> 
-					</tr>
-
-
-					<div class="form-group">
-		    	<tr><td><label>Waktu Mulai Meminjam</label></td></tr>
-		    	<div class='input-group date' id='datetimepicker1'>
-                    <td><input type='text' placeholder="Tentukan Tanggal dan Jam Mulai Kegiatan" name="mulai" class="form-control" autocomplete="off" value="<?= $mulai ?>" onkeydown="event.preventDefault()"/>
-                    <span class="input-group-addon calicon">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
-                    </td>
-                </div>
-            </div>
-
-
-            <div class="form-group">
-		    	<tr><td>Waktu Selesai Meminjam</td></tr>
-		    	<div class='input-group date' id='datetimepicker2'>
-		    		<td>
-                    <input type='text' placeholder="Tentukan Tanggal dan Jam Selesai Kegiatan" name="selesai" class="form-control" autocomplete="off" value="<?= $selesai ?>" onkeydown="event.preventDefault()"/>
-                    <span class="input-group-addon calicon">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
-                    </td>
-                </div>    
-		  	</div>
-
-					<tr>
-						<td><input type="submit" name="update" value="Update" class="btn btn-danger">
-							<input type="reset" name="submit" value="Hapus" class="btn btn-success"></td>
-					</tr>
-				</table>
-			</form>
-		</div>
-	</section>
-</aside> -->

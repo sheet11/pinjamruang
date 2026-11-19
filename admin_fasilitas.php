@@ -1,238 +1,113 @@
-<?php 
-  session_start();
-  include "koneksi.php";
-  if (empty($_SESSION['username'] && $_SESSION['password'])) {
-    header("location:cek_login.php");
-  }
-?>
+<?php
+session_start();
+include 'koneksi.php';
 
+if (empty($_SESSION['username']) || empty($_SESSION['password'])) {
+    header('Location: cek_login.php');
+    exit;
+}
+
+$message = '';
+$messageType = 'success';
+$editRoom = null;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = isset($_POST['action']) ? $_POST['action'] : '';
+    if ($action === 'delete') {
+        $id = (int) ($_POST['id_ruang'] ?? 0);
+        $stmt = mysqli_prepare($koneksi, 'DELETE FROM ruangan WHERE id_ruang = ?');
+        mysqli_stmt_bind_param($stmt, 'i', $id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        header('Location: admin_fasilitas.php?pesan=deleted');
+        exit;
+    }
+
+    if ($action === 'save') {
+        $id = (int) ($_POST['id_ruang'] ?? 0);
+        $nama = trim($_POST['nama_ruang'] ?? '');
+        $gedung = trim($_POST['gedung'] ?? '');
+        $lantai = trim($_POST['lantai'] ?? '');
+        $fasilitas1 = trim($_POST['fasilitas1'] ?? '');
+        $fasilitas2 = trim($_POST['fasilitas2'] ?? '');
+        $fasilitas3 = trim($_POST['fasilitas3'] ?? '');
+        $status = in_array($_POST['status'] ?? '', array('Tersedia', 'Tidak Tersedia'), true) ? $_POST['status'] : 'Tersedia';
+
+        if ($nama === '' || $gedung === '' || $lantai === '') {
+            $message = 'Nama ruang, gedung, dan lantai wajib diisi.';
+            $messageType = 'danger';
+            $editRoom = $_POST;
+        } elseif ($id > 0) {
+            $stmt = mysqli_prepare($koneksi, 'UPDATE ruangan SET nama_ruang=?, gedung=?, lantai=?, fasilitas1=?, fasilitas2=?, fasilitas3=?, status=? WHERE id_ruang=?');
+            mysqli_stmt_bind_param($stmt, 'sssssssi', $nama, $gedung, $lantai, $fasilitas1, $fasilitas2, $fasilitas3, $status, $id);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+            header('Location: admin_fasilitas.php?pesan=updated');
+            exit;
+        } else {
+            $stmt = mysqli_prepare($koneksi, 'INSERT INTO ruangan (nama_ruang, gedung, lantai, fasilitas1, fasilitas2, fasilitas3, status) VALUES (?, ?, ?, ?, ?, ?, ?)');
+            mysqli_stmt_bind_param($stmt, 'sssssss', $nama, $gedung, $lantai, $fasilitas1, $fasilitas2, $fasilitas3, $status);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+            header('Location: admin_fasilitas.php?pesan=created');
+            exit;
+        }
+    }
+}
+
+if (isset($_GET['edit'])) {
+    $id = (int) $_GET['edit'];
+    $stmt = mysqli_prepare($koneksi, 'SELECT * FROM ruangan WHERE id_ruang=?');
+    mysqli_stmt_bind_param($stmt, 'i', $id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $editRoom = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+}
+
+$rooms = mysqli_query($koneksi, 'SELECT * FROM ruangan ORDER BY nama_ruang ASC');
+$messages = array(
+    'created' => 'Ruangan berhasil ditambahkan.',
+    'updated' => 'Data ruangan berhasil diperbarui.',
+    'deleted' => 'Ruangan berhasil dihapus.'
+);
+$notice = isset($_GET['pesan'], $messages[$_GET['pesan']]) ? $messages[$_GET['pesan']] : $message;
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <title>[Admin] Fasilitas | Poltekkes Kemenkes Bengkulu</title>
+  <title>[Admin] Fasilitas Ruangan | Poltekkes Kemenkes Bengkulu</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <link href="./style.css" type="text/css" rel="stylesheet">
+  <link href="./style.css" rel="stylesheet">
+  <link href="./template.css" rel="stylesheet">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <script>
-    (function($, window) {
-    'use strict';
-
-    var MultiModal = function(element) {
-        this.$element = $(element);
-        this.modalCount = 0;
-    };
-
-    MultiModal.BASE_ZINDEX = 1040;
-
-    MultiModal.prototype.show = function(target) {
-        var that = this;
-        var $target = $(target);
-        var modalIndex = that.modalCount++;
-
-        $target.css('z-index', MultiModal.BASE_ZINDEX + (modalIndex * 20) + 10);
-
-        window.setTimeout(function() {
-            
-            if(modalIndex > 0)
-                $('.modal-backdrop').not(':first').addClass('hidden');
-
-            that.adjustBackdrop();
-        });
-    };
-
-    MultiModal.prototype.hidden = function(target) {
-        this.modalCount--;
-
-        if(this.modalCount) {
-           this.adjustBackdrop();
-
-            $('body').addClass('modal-open');
-        }
-    };
-
-    MultiModal.prototype.adjustBackdrop = function() {
-        var modalIndex = this.modalCount - 1;
-        $('.modal-backdrop:first').css('z-index', MultiModal.BASE_ZINDEX + (modalIndex * 20));
-    };
-
-    function Plugin(method, target) {
-        return this.each(function() {
-            var $this = $(this);
-            var data = $this.data('multi-modal-plugin');
-
-            if(!data)
-                $this.data('multi-modal-plugin', (data = new MultiModal(this)));
-
-            if(method)
-                data[method](target);
-        });
-    }
-
-    $.fn.multiModal = Plugin;
-    $.fn.multiModal.Constructor = MultiModal;
-
-    $(document).on('show.bs.modal', function(e) {
-        $(document).multiModal('show', e.target);
-    });
-
-    $(document).on('hidden.bs.modal', function(e) {
-        $(document).multiModal('hidden', e.target);
-    });
-}(jQuery, window));
-  </script>
-
-
-
   <style>
-    
+    body{background:#f4f7fb;color:#19324d}.navbar{position:sticky;top:0;min-height:64px;background:#fff;box-shadow:0 3px 18px rgba(25,50,77,.08)}.navbar li a{color:#3d5369;padding-top:22px;padding-bottom:22px}.navbar li a:hover{background:#eef5fb;color:#087f8c}.icon-bar{background:#163b63}
+    .facility-page{max-width:1200px;margin:0 auto;padding:35px 20px 55px}.facility-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:22px}.facility-head h1{margin:0 0 7px;color:#193b59;font-size:29px;font-weight:700}.facility-head p{margin:0;color:#718196}.facility-card{padding:20px;border:1px solid #e3eaf1;border-radius:15px;background:#fff;box-shadow:0 7px 22px rgba(25,50,77,.05)}.facility-table{min-width:860px;margin:0}.table-wrap{overflow-x:auto}.facility-table thead th{padding:13px 11px;border:0;background:#eef5f8;color:#52677c;font-size:12px;text-transform:uppercase;white-space:nowrap}.facility-table tbody td{padding:13px 11px;border-color:#edf1f5;vertical-align:middle}.facility-table tbody tr:hover{background:#f8fbfc}.status-pill{display:inline-block;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:700}.available{background:#e4f5eb;color:#26704b}.unavailable{background:#fff0f0;color:#a34b4b}.action-group{display:flex;gap:6px}.action-group .btn{border:0;border-radius:6px;font-size:11px}.empty-state{padding:40px!important;text-align:center;color:#8190a1}.form-control{border-radius:8px;box-shadow:none}.modal-content{border-radius:13px}.modal-header{border-bottom:1px solid #edf1f5}.modal-footer{border-top:1px solid #edf1f5}@media(max-width:767px){.facility-page{padding:24px 13px 40px}.facility-head{display:block}.facility-head h1{font-size:24px}.facility-card{padding:13px}}
   </style>
 </head>
-
-
-
-
-
 <body>
-<nav class="navbar">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>                        
-      </button>
-    </div>
-    <div class="collapse navbar-collapse" id="myNavbar">
-      <ul class="nav navbar-nav">
-        <li class="active"><a href="admin_menu.php">Menu Admin</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="kontak.html">Contact</a></li>
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="./logout.php"><span class="glyphicon glyphicon-log-out"></span> Log Out</a></li>
-      </ul>
-    </div>
-  </div>
-</nav>
+<nav class="navbar"><div class="container-fluid"><div class="navbar-header"><button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar"><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button></div><div class="collapse navbar-collapse" id="myNavbar"><ul class="nav navbar-nav"><li class="active"><a href="admin_menu.php">Menu Admin</a></li><li><a href="admin_jadwal.php">Jadwal</a></li></ul><ul class="nav navbar-nav navbar-right"><li><a href="logout.php"><span class="glyphicon glyphicon-log-out"></span> Log Out</a></li></ul></div></div></nav>
 
-<div class="container-fluid">
-  <div class="row content">
-    <div class="col-sm-2 text-center backtop">
-        <br><br><br><br>
-        <a href="./admin_menu.php"><button class="btn backbutton1"><span class="glyphicon glyphicon-menu-left"></span> Kembali</button></a>
-    </div>
-    <div class="col-sm-8 text-center">
-        <br><br><br><br>
-        <h2>Menu Admin Peminjaman Ruangan</h2>
-        <h2>Edit Fasilitas Ruangan</h2><br>
-        <h3>Poltekkes Kemenkes Bengkulu</h3>
-        <h3>Poltekkes Kemenkes Bengkulu</h3><br><br>
-    </div>
-    <div class="col-sm-2">
-    </div>
-  </div>
-</div>
+<main class="facility-page">
+  <header class="facility-head"><div><h1>Fasilitas Ruangan</h1><p>Tambah, ubah, atau hapus informasi ruangan yang tersedia.</p></div><button class="btn btn-primary" data-toggle="modal" data-target="#roomModal"><span class="glyphicon glyphicon-plus"></span> Tambah Ruangan</button></header>
+  <?php if ($notice !== ''): ?><div class="alert alert-<?php echo $messageType; ?>"><span class="glyphicon glyphicon-ok-circle"></span> <?php echo htmlspecialchars($notice, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
+  <section class="facility-card"><div class="table-wrap"><table class="table facility-table"><thead><tr><th>ID</th><th>Nama Ruang</th><th>Lokasi</th><th>Lantai</th><th>Meja</th><th>Kursi</th><th>LCD</th><th>Status</th><th>Aksi</th></tr></thead><tbody>
+  <?php if (!$rooms || mysqli_num_rows($rooms) === 0): ?><tr><td colspan="9" class="empty-state">Belum ada data ruangan.</td></tr><?php endif; ?>
+  <?php while ($room = mysqli_fetch_assoc($rooms)): ?><tr>
+    <td><?php echo (int)$room['id_ruang']; ?></td><td><strong><?php echo htmlspecialchars($room['nama_ruang'], ENT_QUOTES, 'UTF-8'); ?></strong></td><td><?php echo htmlspecialchars($room['gedung'], ENT_QUOTES, 'UTF-8'); ?></td><td><?php echo htmlspecialchars($room['lantai'], ENT_QUOTES, 'UTF-8'); ?></td><td><?php echo htmlspecialchars($room['fasilitas1'], ENT_QUOTES, 'UTF-8'); ?></td><td><?php echo htmlspecialchars($room['fasilitas2'], ENT_QUOTES, 'UTF-8'); ?></td><td><?php echo htmlspecialchars($room['fasilitas3'], ENT_QUOTES, 'UTF-8'); ?></td><td><span class="status-pill <?php echo $room['status'] === 'Tersedia' ? 'available' : 'unavailable'; ?>"><?php echo htmlspecialchars($room['status'], ENT_QUOTES, 'UTF-8'); ?></span></td><td><div class="action-group"><a class="btn btn-warning" href="admin_fasilitas.php?edit=<?php echo (int)$room['id_ruang']; ?>">Edit</a><form method="post" onsubmit="return confirm('Hapus ruangan ini?');"><input type="hidden" name="action" value="delete"><input type="hidden" name="id_ruang" value="<?php echo (int)$room['id_ruang']; ?>"><button class="btn btn-danger" type="submit">Hapus</button></form></div></td>
+  </tr><?php endwhile; ?></tbody></table></div></section>
+</main>
 
-
-
-<?php
-include 'koneksi.php';
-?>
-
-<div class="row content">
-  <div class="col-sm-1"></div>
-    <div class="col-sm-10">
-    <div class="table-responsive">
-
-    <table class="table table-bordered table-hover">
-        <thead class="text-center">
-        <tr>
-        <th>ID Ruang</th>
-        <th>Nama Ruang</th>
-        <th>Lokasi</th>
-        <th>Lantai</th>
-        <th>Fasilitas Meja</th>
-        <th>Fasilitas Kursi</th>
-        <th>Fasilitas LCD</th>
-        <th>Status</th>
-        <th>Aksi</th>
-        </tr>
-        </thead>
-
-    <tbody>
-
-
-    <?php 
-		include 'koneksi.php';
-
-		$data = mysqli_query($koneksi,"select * from ruangan");
-		while($d = mysqli_fetch_array($data)){
-			?>
-			<tr>
-				<td><?php echo $d['id_ruang']; ?></td>
-				<td><?php echo $d['nama_ruang']; ?></td>
-                <td><?php echo $d['gedung']; ?></td>
-                <td><?php echo $d['lantai'] ?></td>
-				<td><?php echo $d['fasilitas1']; ?></td>
-        <td><?php echo $d['fasilitas2']; ?></td>
-        <td><?php echo $d['fasilitas3']; ?></td>
-				<td><?php echo $d['status']; ?></td>
-				<td><?php echo "<a href='#myModal' class='btn btn-default btn-small' id='custId' data-toggle='modal' data-id=".$d['id_ruang'].">Edit</a>"; ?></td>
-			</tr>
-			<?php 
-		}
-	?>
-    </tbody>
-    </table>
-    </div>
-    </div>
-    <div class="col-sm-1"></div>
-</div>
-
-
-
-
-
-<div class="modal fade" id="myModal" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Edit Ruangan</h4>
-            </div>
-
-            <div class="modal-body">
-                <div class="fetched-data"></div>
-            </div>
-            <div class="modal-footer modalfoot">
-                <button type="button" class="btn btndec" data-dismiss="modal">Keluar</button>
-            </div>
-        </div>
-     </div>
-</div>
-
-
-
-
-  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-  <script type="text/javascript">
-    $(document).ready(function(){
-        $('#myModal').on('show.bs.modal', function (e) {
-            var rowid = $(e.relatedTarget).data('id');
-            //menggunakan fungsi ajax untuk pengambilan data
-            $.ajax({
-                type : 'post',
-                url : 'admin_edit.php',
-                data :  'rowid='+ rowid,
-                success : function(data){
-                $('.fetched-data').html(data);//menampilkan data ke dalam modal
-                }
-            });
-         });
-    });
-  </script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-  </body>
-</html>
+<div class="modal fade" id="roomModal" tabindex="-1" role="dialog" aria-labelledby="roomModalTitle"><div class="modal-dialog" role="document"><div class="modal-content"><form method="post">
+  <div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Tutup"><span>&times;</span></button><h4 class="modal-title" id="roomModalTitle"><?php echo $editRoom ? 'Edit Ruangan' : 'Tambah Ruangan'; ?></h4></div>
+  <div class="modal-body"><input type="hidden" name="action" value="save"><input type="hidden" name="id_ruang" value="<?php echo (int)($editRoom['id_ruang'] ?? 0); ?>">
+    <?php $fields = array('nama_ruang' => 'Nama Ruang', 'gedung' => 'Gedung/Lokasi', 'lantai' => 'Lantai', 'fasilitas1' => 'Fasilitas Meja', 'fasilitas2' => 'Fasilitas Kursi', 'fasilitas3' => 'Fasilitas LCD'); foreach ($fields as $field => $label): ?><div class="form-group"><label><?php echo $label; ?><?php echo in_array($field, array('nama_ruang','gedung','lantai'), true) ? ' *' : ''; ?></label><input class="form-control" name="<?php echo $field; ?>" value="<?php echo htmlspecialchars($editRoom[$field] ?? '', ENT_QUOTES, 'UTF-8'); ?>" <?php echo in_array($field, array('nama_ruang','gedung','lantai'), true) ? 'required' : ''; ?>></div><?php endforeach; ?>
+    <div class="form-group"><label>Status</label><select name="status" class="form-control"><option value="Tersedia" <?php echo (($editRoom['status'] ?? '') === 'Tersedia') ? 'selected' : ''; ?>>Tersedia</option><option value="Tidak Tersedia" <?php echo (($editRoom['status'] ?? '') === 'Tidak Tersedia') ? 'selected' : ''; ?>>Tidak Tersedia</option></select></div>
+  </div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Batal</button><button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-save"></span> Simpan</button></div>
+</form></div></div></div>
+<?php if ($editRoom || $messageType === 'danger'): ?><script>$(function(){ $('#roomModal').modal('show'); });</script><?php endif; ?>
+</body></html>

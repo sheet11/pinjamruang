@@ -31,6 +31,7 @@ $meminjam = $req->fetchAll();
   <!-- Bootstrap Core CSS -->
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link href="./style.css" type="text/css" rel="stylesheet">
+  <link href="./template.css" type="text/css" rel="stylesheet">
   
   <!-- Flatpickr CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.3.0/flatpickr.css">
