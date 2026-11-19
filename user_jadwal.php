@@ -72,7 +72,7 @@ foreach ($meminjam as $event) {
   <!-- Bootstrap Core CSS -->
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link href="./style.css" type="text/css" rel="stylesheet">
-  <link href="./template.css" type="text/css" rel="stylesheet">
+  <link href="./template.css?v=20261119-1" type="text/css" rel="stylesheet">
   
   <!-- Flatpickr CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.3.0/flatpickr.css">

@@ -839,6 +839,30 @@ thead > tr {
   border-radius: 8px;
 }
 
+#BookingModal select.form-control {
+  height: 44px;
+  padding: 8px 12px;
+  color: #19324d;
+  line-height: 1.4;
+  background-color: #fff;
+}
+
+#BookingModal .modal-header .close {
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: #dc3545;
+  font-size: 28px;
+  line-height: 1;
+  opacity: 1;
+}
+
+#BookingModal .modal-header .close:hover,
+#BookingModal .modal-header .close:focus {
+  color: #b02a37;
+  opacity: 1;
+}
+
 .booking-modal-date {
   display: flex;
   align-items: center;
