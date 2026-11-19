@@ -86,6 +86,7 @@ foreach ($meminjam as $event) {
 <nav class="navbar">
   <div class="container-fluid">
     <div class="navbar-header">
+      <a class="navbar-brand" href="index.php"><span class="glyphicon glyphicon-home"></span> &nbsp;Peminjaman Ruangan</a>
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -103,6 +104,7 @@ foreach ($meminjam as $event) {
 </nav>
 
 <main class="schedule-wrap">
+  <a class="booking-back" href="index.php"><span class="glyphicon glyphicon-menu-left"></span> Kembali ke Beranda</a>
   <header class="schedule-intro">
     <h1>Kalender Peminjaman Ruangan</h1>
     <p>Periksa jadwal sebelum mengajukan peminjaman. Pilih agenda untuk melihat detail ruang dan waktunya.</p>
