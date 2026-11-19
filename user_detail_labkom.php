@@ -79,14 +79,12 @@ function detailTableSortValue($value) {
       <table class="table detail-table" id="pengajuan">
         <thead>
           <tr>
-            <th>Peminjam</th>
-            <th>Instansi</th>
-            <th>Kegiatan</th>
+            <th>Nama Peminjam</th>
             <th>Mulai</th>
             <th>Selesai</th>
             <th>Status</th>
-            <th>Peserta</th>
-            <th>Keterangan</th>
+            <th>Detail</th>
+            <th>Informasi pencarian</th>
           </tr>
         </thead>
         <tbody>
@@ -101,13 +99,20 @@ function detailTableSortValue($value) {
             ?>
             <tr>
               <td class="table-primary-cell"><?php echo detailTableText($d['nama_peminjam']); ?></td>
-              <td><?php echo detailTableText($d['instansi_peminjam']); ?></td>
-              <td><?php echo detailTableText($d['nama_kegiatan']); ?></td>
               <td class="table-secondary-cell" data-order="<?php echo detailTableText(detailTableSortValue($d['start_date'])); ?>"><?php echo detailTableDate($d['start_date']); ?></td>
               <td class="table-secondary-cell" data-order="<?php echo detailTableText(detailTableSortValue($d['end_date'])); ?>"><?php echo detailTableDate($d['end_date']); ?></td>
               <td><span class="status-badge <?php echo $statusClass; ?>"><?php echo detailTableText($status); ?></span></td>
-              <td><?php echo detailTableText($d['jumlah_mahasiswa'] ?: '-'); ?></td>
-              <td><?php echo detailTableText($d['keterangan'] ?: '-'); ?></td>
+              <td>
+                <button type="button" class="expand-toggle"
+                  data-instansi="<?php echo detailTableText($d['instansi_peminjam'] ?: '-'); ?>"
+                  data-kegiatan="<?php echo detailTableText($d['nama_kegiatan'] ?: '-'); ?>"
+                  data-peserta="<?php echo detailTableText($d['jumlah_mahasiswa'] ?: '-'); ?>"
+                  data-keterangan="<?php echo detailTableText($d['keterangan'] ?: '-'); ?>"
+                  aria-expanded="false">
+                  <span class="glyphicon glyphicon-plus"></span> Detail
+                </button>
+              </td>
+              <td class="detail-search-data"><?php echo detailTableText(implode(' ', array($d['instansi_peminjam'], $d['nama_kegiatan'], $d['jumlah_mahasiswa'], $d['keterangan']))); ?></td>
             </tr>
           <?php endwhile; ?>
         <?php endif; ?>
@@ -120,7 +125,7 @@ function detailTableSortValue($value) {
 <script type="text/javascript">
   $(document).ready(function () {
     $('#pengajuan').DataTable({
-      order: [[3, 'desc']],
+      order: [[1, 'desc']],
       pageLength: 10,
       scrollX: true,
       lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Semua']],
@@ -136,9 +141,38 @@ function detailTableSortValue($value) {
         }
       },
       columnDefs: [
-        { targets: [5], orderable: false },
-        { targets: [6, 7], className: 'text-center' }
+        { targets: [4, 5], orderable: false },
+        { targets: [4], searchable: false, className: 'text-center' },
+        { targets: [5], visible: false }
       ]
+    });
+
+    $('#pengajuan tbody').on('click', '.expand-toggle', function () {
+      var button = $(this);
+      var row = $('#pengajuan').DataTable().row(button.closest('tr'));
+
+      if (row.child.isShown()) {
+        row.child.hide();
+        button.attr('aria-expanded', 'false').html('<span class="glyphicon glyphicon-plus"></span> Detail');
+        return;
+      }
+
+      var details = [
+        ['Instansi', this.getAttribute('data-instansi')],
+        ['Kegiatan', this.getAttribute('data-kegiatan')],
+        ['Peserta', this.getAttribute('data-peserta') === '-' ? '-' : this.getAttribute('data-peserta') + ' orang'],
+        ['Keterangan', this.getAttribute('data-keterangan')]
+      ];
+      var panel = $('<div class="public-detail-panel"></div>');
+      $.each(details, function (index, item) {
+        var detailItem = $('<div class="public-detail-item"></div>');
+        detailItem.append($('<span></span>').text(item[0]));
+        detailItem.append($('<strong></strong>').text(item[1] || '-'));
+        panel.append(detailItem);
+      });
+
+      row.child(panel).show();
+      button.attr('aria-expanded', 'true').html('<span class="glyphicon glyphicon-minus"></span> Tutup detail');
     });
   });
 </script>

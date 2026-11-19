@@ -487,6 +487,58 @@ thead > tr {
   color: #fff;
 }
 
+.expand-toggle {
+  border: 0;
+  border-radius: 6px;
+  padding: 7px 10px;
+  background: #eaf6f5;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.expand-toggle:hover,
+.expand-toggle:focus {
+  background: var(--primary);
+  color: #fff;
+}
+
+.detail-search-data {
+  display: none;
+}
+
+.public-detail-panel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+  padding: 16px;
+  border-top: 1px solid #dcebed;
+  background: #f8fbfc;
+  white-space: normal;
+  text-align: left;
+}
+
+.public-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.public-detail-item span {
+  color: #8190a1;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.public-detail-item strong {
+  color: #35566a;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
 .schedule-wrap {
   max-width: 1120px;
   margin: 0 auto;
@@ -1402,6 +1454,11 @@ body.modal-open {
 
   .detail-table-card .dataTables_filter input {
     width: 150px;
+  }
+
+  .public-detail-panel {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .schedule-card-toolbar {
