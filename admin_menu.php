@@ -87,17 +87,25 @@
   function beep() {
     unlockAudio();
     if (!audioContext) return;
-    var oscillator = audioContext.createOscillator();
-    var gain = audioContext.createGain();
-    oscillator.type = 'sine';
-    oscillator.frequency.value = 880;
-    gain.gain.setValueAtTime(0.0001, audioContext.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.16, audioContext.currentTime + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.35);
-    oscillator.connect(gain);
-    gain.connect(audioContext.destination);
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.35);
+    var notes = [784, 988, 784, 1047];
+    var noteDuration = 0.24;
+    var interval = 0.36;
+    var startTime = audioContext.currentTime;
+
+    notes.forEach(function (frequency, index) {
+      var noteStart = startTime + (index * interval);
+      var oscillator = audioContext.createOscillator();
+      var gain = audioContext.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(0.0001, noteStart);
+      gain.gain.exponentialRampToValueAtTime(0.14, noteStart + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, noteStart + noteDuration);
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+      oscillator.start(noteStart);
+      oscillator.stop(noteStart + noteDuration);
+    });
   }
 
   function showNotification(count) {
